@@ -1,5 +1,71 @@
 # AStarProject
 
+## Introduction
+This is a version of the A*algorithm a commonly user algorithm for pathfindin. This project is created as part of a 4th year C++ module.
+
+## How it works
+The code consists of the main.cpp file which is used to run the algorithm. It follows an OO (Object Oriented) style having two classes one for creating nodes that contains f,g, and h values used by the algorithm to determine the shortest path. The second class is called grid it contants methods to create and iteract with the grid, it also has a method to run the algorithm.
+
+## Code
+isValid function is used to check if a node is valid i.e. within the confines of the 2D array.
+```C++
+bool Grid::isValid(std::pair<int, int> node) {
+	return (node.first >= 0) && (node.first < 20) && (node.second >= 0) && (node.second < 20); //TODO: replace this with a passed in row and col val
+};
+```
+
+isBlocked checks if a node is and obsticale (indecated by the number 1 or 3). 1 means it is an obsticale that existed when the grid was generated and 3 means it is a path the algorithm has tried but reached a dead end.
+```C++
+bool Grid::isBlocked(std::pair<int, int> current) {
+	if (grid[current.first][current.second] == 1 || grid[current.first][current.second] == 3) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+```
+
+isDestination checks if the algrithm has reached the end goal defined.
+```C++
+bool Grid::isDestination(std::pair<int, int> current, std::pair<int, int> dest) {
+	if (current.first == dest.first && current.second == dest.second) {
+		return true;
+	}
+	else {
+		return false;
+	}
+};
+```
+
+printGrid is used to display the grid in the terminal. It also adds some syling by replacing 1s on the the grid with a #. Color is added to the grind when printing using \003[colorValuem.
+```C++
+void Grid::printGrid() {
+	for (std::vector<int> s : grid) {
+		for (int n : s) {
+			switch (n) {
+			case 1:
+				std::cout << "\033[31m#" << " \033[0m";
+				break;
+			case 2:
+				std::cout << "\033[32m" << n << " \033[0m";
+				break;
+			case 3:
+				std::cout << "\033[33m" << n << " \033[0m";
+				break;
+			default:
+				std::cout << n << " ";
+				break;
+			}
+		}
+		std::cout << "\n";
+	}
+};
+```
+## Testing
+
+## References
+
 Grid.cpp
 
 ```C++
