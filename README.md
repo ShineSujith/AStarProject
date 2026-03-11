@@ -1,12 +1,33 @@
 # AStarProject
 
 ## Introduction
-This is a version of the A*algorithm a commonly user algorithm for pathfindin. This project is created as part of a 4th year C++ module.
+This is a version of the A*algorithm a commonly user algorithm for pathfinding. This project is created as part of a 4th year C++ module.
 
-## How it works
-The code consists of the main.cpp file which is used to run the algorithm. It follows an OO (Object Oriented) style having two classes one for creating nodes that contains f,g, and h values used by the algorithm to determine the shortest path. The second class is called grid it contants methods to create and iteract with the grid, it also has a method to run the algorithm.
+## Project Management
+### Research
+I started the project off by doing research into what the A* algorithm is and how it works. My starting point was the resources linked in the course which helped me get an idea of the project structure I would use. The 
+version of the A* algorithm I ended up writing was heavily inspired by the Geeks for Geeks example we were given.
 
-## Code
+### Code Structure
+The code consists of the main.cpp file which is used to run the algorithm. It follows an OO (Object Oriented) style having two classes one for creating nodes that contains f,g, and h values used by the algorithm to
+determine the shortest path. The second class is called grid it contains methods to create and interact with the grid; it also has a method to run the algorithm.
+
+### Planning
+My plan was to split up this project into two-week sprints. In the first two weeks I planned to have a working version of the A* algorithm working. I planned to spend the next two weeks polishing and improving the code.
+Then spend the last two weeks adding tests and writing my report.
+
+I kept to this plan and had a working version of the algorithm done by the middle of the second week. However I was unable to finish polishing and improving the code by the end of week four, this was because I realised
+the version of the algorithm I wrote could not be considered a true A* algorithm due to the fact I was create one node that acted as a parent node shared between all surrounding nodes of the current node. This meant the
+algorithm heavily relied on the heuristic value (h) and g barely affected the output. At this point it was closer to a greedy best first/hill climber algorithm. Week four was spent updating my logic to create a node for
+each neighbour node rather than a parent node as well as trying to use the improved g value for tiebreaking (decide which path is shorter if the h values are the same by using the lower g value node).
+
+For 
+
+## Output
+<img width="1105" height="418" alt="image" src="https://github.com/user-attachments/assets/a2c1bdb2-cfa6-4445-827f-20ec9cbc49b0" />
+
+## Code/Core Content
+### Grid.cpp
 isValid function is used to check if a node is valid i.e. within the confines of the 2D array.
 ```C++
 bool Grid::isValid(std::pair<int, int> node) {
@@ -26,7 +47,7 @@ bool Grid::isBlocked(std::pair<int, int> current) {
 }
 ```
 
-isDestination checks if the algrithm has reached the end goal defined.
+isDestination checks if the algrithm has reached the end goal by checking if the currect node is equal to the destination node.
 ```C++
 bool Grid::isDestination(std::pair<int, int> current, std::pair<int, int> dest) {
 	if (current.first == dest.first && current.second == dest.second) {
@@ -62,9 +83,28 @@ void Grid::printGrid() {
 	}
 };
 ```
+
+In the begining I had a method to resize the grid and populate it with unseeded random numbers between 0 and 1. This was done to make it easy to test and debug because since it was unseeded the grid would always be the same every time i ran the code.
+```C++
+void Grid::setGrid() {
+	grid.resize(20, std::vector<int>(20, 0)); //TODO: replace this with a passed in row and col val
+	for (std::vector<int>& s : grid)
+		for (int& n : s)
+			n = rand() % 2; //TODO: replace this with C++ random 
+};
+```
+
+
 ## Testing
 
+## Reflection
+
 ## References
+https://stackoverflow.com/questions/5768316/pop-a-specific-element-off-a-vector-in-c
+
+https://www.geeksforgeeks.org/cpp/how-to-change-console-color-in-cpp/
+
+https://en.cppreference.com/w/cpp/algorithm/find.html
 
 Grid.cpp
 
