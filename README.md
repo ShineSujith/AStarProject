@@ -319,3 +319,115 @@ public:
 
 #endif
 ```
+
+Tests.h
+```C++
+#ifndef TESTS_H
+#define TESTS_H
+
+void TestWorkingAStar();
+void TestInvalidSource();
+void TestInvalidDestination();
+void TestDefaultConstructor();
+void TestTwoArgumentConstructor();
+void TestCopyConstructor();
+void TestCopyAssignmentConstructor();
+void TestNodeEqualsDestination();
+//void TestDestinationUnreachable();
+void TestDestinationBlocked();
+void TestSourceBlocked();
+void runTests();
+
+#endif
+```
+
+Tests.cpp
+```C++
+#include "Grid.h"
+#include "Tests.h"
+
+void runTests() {
+	TestWorkingAStar();
+	TestInvalidSource();
+	TestInvalidDestination();
+	TestCopyAssignmentConstructor();
+	TestCopyConstructor();
+	TestDefaultConstructor();
+	TestTwoArgumentConstructor();
+	//TestDestinationUnreachable();
+	TestDestinationBlocked();
+	TestSourceBlocked();
+	TestNodeEqualsDestination();
+};
+
+void TestDefaultConstructor() {
+	Grid grid;
+};
+
+void TestTwoArgumentConstructor() {
+	Grid grid(10, 10);
+};
+
+void TestCopyConstructor() {
+	Grid grid1;
+	Grid grid2(grid1);
+};
+
+void TestCopyAssignmentConstructor() {
+	Grid grid1;
+	Grid grid2;
+	grid2 = grid1;
+};
+
+void TestWorkingAStar() {
+	Grid grid;
+	std::pair<int, int> start = { 1,11 };
+	std::pair<int, int> end = { 18,16 };
+	grid.aStarSearch(start, end);
+};
+
+void TestInvalidSource() {
+	Grid grid;
+	std::pair<int, int> start = { -1,11 };
+	std::pair<int, int> end = { 18,16 };
+	grid.aStarSearch(start, end);
+};
+
+void TestInvalidDestination() {
+	Grid grid;
+	std::pair<int, int> start = { 1,11 };
+	std::pair<int, int> end = { -1,16 };
+	grid.aStarSearch(start, end);
+};
+
+void TestSourceBlocked() {
+	Grid grid;
+	std::pair<int, int> start = { 0,0 };
+	std::pair<int, int> end = { 18,16 };
+	grid.aStarSearch(start, end);
+};
+
+void TestDestinationBlocked() {
+	Grid grid;
+	std::pair<int, int> start = { 1,11 };
+	std::pair<int, int> end = { 19,19 };
+	grid.aStarSearch(start, end);
+};
+
+// This test causes a crash because src is removed from path when it 
+// appears multiple times and then path.back() is called in the next 
+// iteration which causes an out of bounds access.
+//void TestDestinationUnreachable() {
+//	Grid grid;
+//	std::pair<int, int> start = { 3,0 };
+//	std::pair<int, int> end = { 18,16 };
+//	grid.aStarSearch(start, end);
+//};
+
+void TestNodeEqualsDestination() {
+	Grid grid;
+	std::pair<int, int> start = { 1,11 };
+	std::pair<int, int> end = { 1,11 };
+	grid.aStarSearch(start, end);
+};
+```
