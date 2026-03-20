@@ -1,4 +1,5 @@
-# AStarProject
+# A* Algorithm Project
+by: Shine Sujith - G00414454
 
 ## Introduction
 This is a version of the A* algorithm a commonly used algorithm for pathfinding. It combines features of uniform-cost search and pure heuristic search to efficiently compute optimal paths. The A* algorithm is a best-first search algorithm
@@ -14,6 +15,60 @@ version of the A* algorithm I ended up writing was heavily inspired by the Geeks
 ### Code Structure
 The code consists of the main.cpp file which is used to run the algorithm. It follows an OO (Object Oriented) style having two classes one for creating nodes that contains f, g, and h values used by the algorithm to
 determine the shortest path. The second class is called grid it contains methods to create and interact with the grid; it also has a method to run the algorithm.
+
+Grid.h
+
+```C++
+#include <iostream>
+#include <vector> //vector
+
+#ifndef GRID_H
+#define GRID_H
+
+#define VERBOSE 1
+
+class Grid {
+private:
+	std::vector<std::vector<int>> grid;
+public:
+	Grid();
+	Grid(int, int);
+	Grid(const Grid&);
+	Grid& operator=(const Grid&);
+	~Grid();
+
+	bool isValid(const std::pair<int, int>& node) const;
+	bool isBlocked(const std::pair<int, int>& current) const;
+	bool isDestination(const std::pair<int, int>& current, const std::pair<int, int>& dest) const;
+	void aStarSearch(const std::pair<int, int>& src, const std::pair<int, int>& dest);
+	void printGrid() const;
+	std::vector<std::pair<int, int>> findNeigbours(const std::pair<int, int>& currentNode) const;
+};
+
+#endif
+```
+
+NodeBase.h
+```C++
+#include <iostream>	//pair
+#include <cmath>	//sqrt, pow
+
+#include "NodeBase.h"
+
+void NodeBase::setG(double newG) {
+	g = newG;
+};
+
+double NodeBase::getF() {
+	f = g + h;
+	return f;
+};
+
+//Calculates the Euclidean Distance
+void NodeBase::calculateH(const std::pair<int, int>& current, const std::pair<int, int>& dest) {
+	h = std::sqrt(std::pow(current.first - dest.first, 2) + std::pow(current.second - dest.second, 2));
+};
+```
 
 ### Planning
 My plan was to split up this project into two-week sprints. In the first two weeks I planned to have a working version of the A* algorithm. I planned to spend the next two weeks polishing and improving the code.
@@ -33,16 +88,16 @@ them to be more deterministic.
 
 ## Code/Core Content
 ### Grid.cpp
-isValid function is used to check if a node is valid i.e. within the confines of the 2D array.
+isValid function is used to check if a node is valid i.e. within the confines of the 2D array. This fucntion is almost one for one what it was in the Geeks for Geeks example the main changes being it is now a member function of the Grid class and the node argument has been changed to use pass by reference instead of pass by copy to improve memory efficientcy and speed.
 ```C++
-bool Grid::isValid(std::pair<int, int> node) {
-	return (node.first >= 0) && (node.first < 20) && (node.second >= 0) && (node.second < 20); //TODO: replace this with a passed in row and col val
+bool Grid::isValid(const std::pair<int, int>& node) const {
+	return (node.first >= 0) && (node.first < 20) && (node.second >= 0) && (node.second < 20);
 };
 ```
 
 isBlocked checks if a node is and obsticale (indecated by the number 1 or 3). 1 means it is an obsticale that existed when the grid was generated and 3 means it is a path the algorithm has tried but reached a dead end.
 ```C++
-bool Grid::isBlocked(std::pair<int, int> current) {
+bool Grid::isBlocked(const std::pair<int, int>& current) const {
 	if (grid[current.first][current.second] == 1 || grid[current.first][current.second] == 3) {
 		return true;
 	}
@@ -54,7 +109,7 @@ bool Grid::isBlocked(std::pair<int, int> current) {
 
 isDestination checks if the algrithm has reached the end goal by checking if the currect node is equal to the destination node.
 ```C++
-bool Grid::isDestination(std::pair<int, int> current, std::pair<int, int> dest) {
+bool Grid::isDestination(const std::pair<int, int>& current, const std::pair<int, int>& dest) const {
 	if (current.first == dest.first && current.second == dest.second) {
 		return true;
 	}
@@ -66,9 +121,9 @@ bool Grid::isDestination(std::pair<int, int> current, std::pair<int, int> dest) 
 
 printGrid is used to display the grid in the terminal. It also adds some syling by replacing 1s on the the grid with a #. Color is added to the grind when printing using \003[colorValuem.
 ```C++
-void Grid::printGrid() {
-	for (std::vector<int> s : grid) {
-		for (int n : s) {
+void Grid::printGrid() const {
+	for (const std::vector<int> s : grid) {
+		for (const int n : s) {
 			switch (n) {
 			case 1:
 				std::cout << "\033[31m#" << " \033[0m";
@@ -93,10 +148,10 @@ In the begining I had a method to resize the grid and populate it with unseeded 
 the code.
 ```C++
 void Grid::setGrid() {
-	grid.resize(20, std::vector<int>(20, 0)); //TODO: replace this with a passed in row and col val
+	grid.resize(20, std::vector<int>(20, 0));
 	for (std::vector<int>& s : grid)
 		for (int& n : s)
-			n = rand() % 2; //TODO: replace this with C++ random 
+			n = rand() % 2; 
 };
 ```
 
@@ -130,7 +185,7 @@ Grid::Grid(int row, int col) {
 
 findNeighbours is a helper funtion used in the aStarSearch method to find the eight neighbour nodes that surrond the current node.
 ```C++
-std::vector<std::pair<int, int>> Grid::findNeigbours(std::pair<int, int> currentNode) {
+std::vector<std::pair<int, int>> Grid::findNeigbours(const std::pair<int, int>& currentNode) const {
 	std::vector<std::pair<int, int>> neighbours = { {currentNode.first - 1, currentNode.second},
 		{currentNode.first + 1, currentNode.second}, {currentNode.first, currentNode.second + 1},
 		{currentNode.first, currentNode.second - 1}, {currentNode.first - 1, currentNode.second + 1},
@@ -138,6 +193,73 @@ std::vector<std::pair<int, int>> Grid::findNeigbours(std::pair<int, int> current
 		{currentNode.first + 1, currentNode.second - 1} };
 	return neighbours;
 }
+```
+
+The aStarSearch is the method for running the A* algortihm on the grid. It starts by checking if the start and end nodes are valid using isValid and isBlocked function. There is a destination unreachabe variable that prvents the code from
+getting stuck in an infinite loop. There are possitives and negatives to having the destination unreachable variable that main one being if the grid is too big 50 iterations may not be enough to reach the destination. The other downside is
+that if the start node is completly surrounded on all eight sides by blocking or invalid nodes destUnreachable does not work and the code crashes beacsue the back track logic I have removes path values that repeat, so when the start node
+repeats it is erased from the path once that happens in the next iteration the code calls path.back() on an empty path variable.
+```C++
+void Grid::aStarSearch(const std::pair<int, int>& src, const std::pair<int, int>& dest) {
+	std::vector<std::pair<int, int>> path = { src };
+	if (isValid(src) == false || isBlocked(src) == true) {
+		std::cout << "source is invalid\n";
+		return;
+	}
+
+	if (isValid(dest) == false || isBlocked(dest) == true) {
+		std::cout << "destination is invalid\n";
+		return;
+	}
+
+	int destUnreachable = 0;
+	grid[src.first][src.second] = 2;
+	std::pair<int, int> closestNeighbour = src;
+
+	while (!isDestination(path.back(), dest)) {
+		auto currentNeighbours = findNeigbours(path.back());
+		double newF = DBL_MAX;
+		double bestG = DBL_MAX;
+
+		for (auto& i : currentNeighbours) {
+			if (isValid(i) && !isBlocked(i)) {
+				NodeBase node;
+				double gVal = static_cast<double>(path.size());
+				node.setG(gVal);
+				node.calculateH(i, dest);
+				double fVal = node.getF();
+				if (fVal < newF || (fVal == newF && gVal < bestG)) {
+					newF = fVal;
+					bestG = gVal;
+					closestNeighbour = i;
+				}
+			}
+		}
+
+		if (std::find(path.begin(), path.end(), closestNeighbour) != path.end()) {
+			path.erase(std::find(path.begin(), path.end(), closestNeighbour));
+			grid[closestNeighbour.first][closestNeighbour.second] = 3;
+		}
+		else {
+			path.push_back(closestNeighbour);
+			grid[closestNeighbour.first][closestNeighbour.second] = 2;
+		}
+
+		destUnreachable++;
+
+		if (destUnreachable == 50) {
+			break;
+		}
+	}
+	printGrid();
+	if (destUnreachable == 50) {
+		std::cout << "destination can not be reached\n";
+	}
+	std::cout << "Path: ";
+	for (auto& n : path)
+		std::cout << "(" << n.first << "," << n.second << ") ";
+};
+```
 ```
 
 ## Testing
@@ -254,6 +376,8 @@ void TestNodeEqualsDestination() {
 ```
 
 ## Reflection
+During the course of this project I learned a lot about...
+If I were to do this project again I would plan better by giving myself some tolerance in terms of time near the end in case something unforseen happens like realising that the way I was implementing the node checking could not be considered using the A* algorithm.
 
 ## References
 https://thealgorithms.github.io/Python/autoapi/machine_learning/astar/index.html 20/03/2026
@@ -275,30 +399,6 @@ Grid.cpp
 
 #include "Grid.h"
 #include "NodeBase.h"
-
-Grid::Grid() {
-#if VERBOSE
-	std::cout << "Executing Grid default constructor" << std::endl;
-#endif
-	srand(1);
-
-	grid.resize(20, std::vector<int>(20, 0));
-	for (std::vector<int>& s : grid)
-		for (int& n : s)
-			n = rand() % 2;
-};
-
-Grid::Grid(int row, int col) {
-#if VERBOSE
-	std::cout << "Executing Grid two argument constructor" << std::endl;
-#endif
-	srand(1);
-
-	grid.resize(row, std::vector<int>(col, 0));
-	for (std::vector<int>& s : grid)
-		for (int& n : s)
-			n = rand() % 2;
-};
 
 Grid::Grid(const Grid& rhs) {
 #if VERBOSE
@@ -322,119 +422,6 @@ Grid::~Grid() {
 	std::cout << "Executing Grid destructor" << std::endl;
 #endif
 	grid.clear();
-}
-
-bool Grid::isValid(const std::pair<int, int>& node) const {
-	return (node.first >= 0) && (node.first < 20) && (node.second >= 0) && (node.second < 20);
-};
-
-bool Grid::isBlocked(const std::pair<int, int>& current) const {
-	if (grid[current.first][current.second] == 1 || grid[current.first][current.second] == 3) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-bool Grid::isDestination(const std::pair<int, int>& current, const std::pair<int, int>& dest) const {
-	if (current.first == dest.first && current.second == dest.second) {
-		return true;
-	}
-	else {
-		return false;
-	}
-};
-
-void Grid::printGrid() const {
-	for (const std::vector<int> s : grid) {
-		for (const int n : s) {
-			switch (n) {
-			case 1:
-				std::cout << "\033[31m#" << " \033[0m";
-				break;
-			case 2:
-				std::cout << "\033[32m" << n << " \033[0m";
-				break;
-			case 3:
-				std::cout << "\033[33m" << n << " \033[0m";
-				break;
-			default:
-				std::cout << n << " ";
-				break;
-			}
-		}
-		std::cout << "\n";
-	}
-};
-
-void Grid::aStarSearch(const std::pair<int, int>& src, const std::pair<int, int>& dest) {
-	std::vector<std::pair<int, int>> path = { src };
-	if (isValid(src) == false || isBlocked(src) == true) {
-		std::cout << "source is invalid\n";
-		return;
-	}
-
-	if (isValid(dest) == false || isBlocked(dest) == true) {
-		std::cout << "destination is invalid\n";
-		return;
-	}
-
-	int destUnreachable = 0;
-	grid[src.first][src.second] = 2;
-	std::pair<int, int> closestNeighbour = src;
-
-	while (!isDestination(path.back(), dest)) {
-		auto currentNeighbours = findNeigbours(path.back());
-		double newF = DBL_MAX;
-		double bestG = DBL_MAX;
-
-		for (auto& i : currentNeighbours) {
-			if (isValid(i) && !isBlocked(i)) {
-				NodeBase node;
-				double gVal = static_cast<double>(path.size());
-				node.setG(gVal);
-				node.calculateH(i, dest);
-				double fVal = node.getF();
-				if (fVal < newF || (fVal == newF && gVal < bestG)) {
-					newF = fVal;
-					bestG = gVal;
-					closestNeighbour = i;
-				}
-			}
-		}
-
-		if (std::find(path.begin(), path.end(), closestNeighbour) != path.end()) {
-			path.erase(std::find(path.begin(), path.end(), closestNeighbour));
-			grid[closestNeighbour.first][closestNeighbour.second] = 3;
-		}
-		else {
-			path.push_back(closestNeighbour);
-			grid[closestNeighbour.first][closestNeighbour.second] = 2;
-		}
-
-		destUnreachable++;
-
-		if (destUnreachable == 50) {
-			break;
-		}
-	}
-	printGrid();
-	if (destUnreachable == 50) {
-		std::cout << "destination can not be reached\n";
-	}
-	std::cout << "Path: ";
-	for (auto& n : path)
-		std::cout << "(" << n.first << "," << n.second << ") ";
-};
-
-std::vector<std::pair<int, int>> Grid::findNeigbours(const std::pair<int, int>& currentNode) const {
-	std::vector<std::pair<int, int>> neighbours = { {currentNode.first - 1, currentNode.second},
-		{currentNode.first + 1, currentNode.second}, {currentNode.first, currentNode.second + 1},
-		{currentNode.first, currentNode.second - 1}, {currentNode.first - 1, currentNode.second + 1},
-		{currentNode.first - 1, currentNode.second - 1}, {currentNode.first + 1, currentNode.second + 1},
-		{currentNode.first + 1, currentNode.second - 1} };
-	return neighbours;
 }
 ```
 
@@ -478,58 +465,3 @@ void NodeBase::calculateH(std::pair<int, int> current, std::pair<int, int> dest)
 	h = std::sqrt(std::pow(current.first - dest.first, 2) + std::pow(current.second - dest.second, 2));
 };
 ```
-
-Grid.h
-
-```C++
-#include <iostream>
-#include <vector> //vector
-
-#ifndef GRID_H
-#define GRID_H
-
-#define VERBOSE 1
-
-class Grid {
-private:
-	std::vector<std::vector<int>> grid;
-public:
-	Grid();
-	Grid(int, int);
-	Grid(const Grid&);
-	Grid& operator=(const Grid&);
-	~Grid();
-
-	bool isValid(const std::pair<int, int>& node) const;
-	bool isBlocked(const std::pair<int, int>& current) const;
-	bool isDestination(const std::pair<int, int>& current, const std::pair<int, int>& dest) const;
-	void aStarSearch(const std::pair<int, int>& src, const std::pair<int, int>& dest);
-	void printGrid() const;
-	std::vector<std::pair<int, int>> findNeigbours(const std::pair<int, int>& currentNode) const;
-};
-
-#endif
-```
-
-NodeBase.h
-```C++
-#include <iostream>	//pair
-#include <cmath>	//sqrt, pow
-
-#include "NodeBase.h"
-
-void NodeBase::setG(double newG) {
-	g = newG;
-};
-
-double NodeBase::getF() {
-	f = g + h;
-	return f;
-};
-
-//Calculates the Euclidean Distance
-void NodeBase::calculateH(const std::pair<int, int>& current, const std::pair<int, int>& dest) {
-	h = std::sqrt(std::pow(current.first - dest.first, 2) + std::pow(current.second - dest.second, 2));
-};
-```
-
