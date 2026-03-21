@@ -13,8 +13,8 @@ I started the project off by doing research into what the A* algorithm is and ho
 version of the A* algorithm I ended up writing was heavily inspired by the Geeks for Geeks example we were given [].
 
 ### Code Structure
-The code consists of the main.cpp file which is used to run the algorithm. It follows an OO (Object Oriented) style having two classes one for creating nodes that contains f, g, and h values used by the algorithm to
-determine the shortest path. The second class is called grid it contains methods to create and interact with the grid; it also has a method to run the algorithm.
+The code consists of the main.cpp file which is used to run the algorithm and the tests. It follows an OO (Object Oriented) style having two classes one for creating nodes that contains f, g, and h values used by the algorithm to
+determine the shortest path. The second class is called grid it contains methods to create and interact with the grid; it also has a method to run the algorithm called aStarSearch.
 
 Grid.h
 
@@ -50,24 +50,21 @@ public:
 
 NodeBase.h
 ```C++
-#include <iostream>	//pair
-#include <cmath>	//sqrt, pow
+#ifndef NODE_BASE_H
+#define HODE_BASE_H
 
-#include "NodeBase.h"
-
-void NodeBase::setG(double newG) {
-	g = newG;
+class NodeBase {
+private:
+	double g = 0;
+	double h = 0;
+	double f = 0;
+public:
+	void setG(double newG);
+	double getF();
+	void calculateH(const std::pair<int, int>& current, const std::pair<int, int>& dest);
 };
 
-double NodeBase::getF() {
-	f = g + h;
-	return f;
-};
-
-//Calculates the Euclidean Distance
-void NodeBase::calculateH(const std::pair<int, int>& current, const std::pair<int, int>& dest) {
-	h = std::sqrt(std::pow(current.first - dest.first, 2) + std::pow(current.second - dest.second, 2));
-};
+#endif
 ```
 
 ### Planning
@@ -75,7 +72,7 @@ My plan was to split up this project into two-week sprints. In the first two wee
 Then spend the last two weeks adding tests and writing my report.
 
 I kept to this plan and had a working version of the algorithm done by the middle of the second week. However I was unable to finish polishing and improving the code by the end of week four, this was because I realised
-the version of the algorithm I wrote could not be considered a true A* algorithm due to the fact I was create one node that acted as a parent node shared between all surrounding nodes of the current node. This meant the
+the version of the algorithm I wrote could not be considered a true A* algorithm due to the fact I was creating one node that acted as a parent node shared between all surrounding nodes of the current node. This meant the
 algorithm heavily relied on the heuristic value (h) and g barely affected the output. At this point it was closer to a greedy best first/hill climber algorithm. Week four was spent updating my logic to create a node for
 each neighbour node rather than a parent node as well as trying to use the improved g value for tiebreaking (decide which path is shorter if the h values are the same by using the lower g value node).
 
@@ -260,10 +257,11 @@ void Grid::aStarSearch(const std::pair<int, int>& src, const std::pair<int, int>
 		std::cout << "(" << n.first << "," << n.second << ") ";
 };
 ```
-```
 
 ## Testing
-Tests.h
+Testing palyed an important part in helping debug my project. During the last week I added two files Tests.h to declare test functions and a Tests.cpp file which contian the function definitions. You might notice that there is a test funtion that is comment out this will be explained later. Earier I mentioned seeding the the rand function to generate a fixed grid, originally I planned on creating a fixed grid in the test file an dusing that however after talking to my lecturer I realised with my current setup it would be easier to just seed the grid generation using srand.
+
+### Tests.h:
 ```C++
 #ifndef TESTS_H
 #define TESTS_H
@@ -284,11 +282,9 @@ void runTests();
 #endif
 ```
 
-Tests.cpp
+### Tests.cpp:
+The runTests function is called in main to runn all the other test function.
 ```C++
-#include "Grid.h"
-#include "Tests.h"
-
 void runTests() {
 	TestWorkingAStar();
 	TestInvalidSource();
@@ -302,33 +298,17 @@ void runTests() {
 	TestSourceBlocked();
 	TestNodeEqualsDestination();
 };
+```
 
+TestDefaultConstructor tests if the default constructor is called when instanciating a grid object with no parameters.
+```C++
 void TestDefaultConstructor() {
 	Grid grid;
 };
+```
 
-void TestTwoArgumentConstructor() {
-	Grid grid(10, 10);
-};
-
-void TestCopyConstructor() {
-	Grid grid1;
-	Grid grid2(grid1);
-};
-
-void TestCopyAssignmentConstructor() {
-	Grid grid1;
-	Grid grid2;
-	grid2 = grid1;
-};
-
-void TestWorkingAStar() {
-	Grid grid;
-	std::pair<int, int> start = { 1,11 };
-	std::pair<int, int> end = { 18,16 };
-	grid.aStarSearch(start, end);
-};
-
+TestInvalidSource annd TestInvalidDestination both test the isValid function to see if the source or destination node is within the grid.
+```C++
 void TestInvalidSource() {
 	Grid grid;
 	std::pair<int, int> start = { -1,11 };
@@ -342,7 +322,10 @@ void TestInvalidDestination() {
 	std::pair<int, int> end = { -1,16 };
 	grid.aStarSearch(start, end);
 };
+```
 
+Similarly TestSourceBlocked and TestDestinationBlocked tests the isBlocked function to see if the source or destination are on blocked squares 1 or # squares.
+```C++
 void TestSourceBlocked() {
 	Grid grid;
 	std::pair<int, int> start = { 0,0 };
@@ -356,7 +339,20 @@ void TestDestinationBlocked() {
 	std::pair<int, int> end = { 19,19 };
 	grid.aStarSearch(start, end);
 };
+```
 
+TestWoringAStar test the succussesful run of the algorithm.
+```C++
+void TestWorkingAStar() {
+	Grid grid;
+	std::pair<int, int> start = { 1,11 };
+	std::pair<int, int> end = { 18,16 };
+	grid.aStarSearch(start, end);
+};
+```
+
+The TestDestinationUnreachable function is commented out because it causes a crash. This was the test that helped me reailse that the isDestUnreachable variable had a down side due to my back track logic. If I did not write this test I would never have know and it show just how important testing really is.
+```C++
 // This test causes a crash because src is removed from path when it 
 // appears multiple times and then path.back() is called in the next 
 // iteration which causes an out of bounds access.
@@ -366,7 +362,10 @@ void TestDestinationBlocked() {
 //	std::pair<int, int> end = { 18,16 };
 //	grid.aStarSearch(start, end);
 //};
+```
 
+The final test is used to test for unexpected behavior if the start and end nodes are the same value.
+```C++
 void TestNodeEqualsDestination() {
 	Grid grid;
 	std::pair<int, int> start = { 1,11 };
@@ -376,8 +375,7 @@ void TestNodeEqualsDestination() {
 ```
 
 ## Reflection
-During the course of this project I learned a lot about...
-If I were to do this project again I would plan better by giving myself some tolerance in terms of time near the end in case something unforseen happens like realising that the way I was implementing the node checking could not be considered using the A* algorithm.
+During the course of this project I learned a lot about C++ in general, I learned how to create unit tests for C++ code, and gained valuable experince using many of the libraries C++ offers like the vectors and algorithm libraries. I think a big mistake I made while creating the code for the A * algoritm was that I tried to diviate from what the algorithm is too early. Instead I should  have tried writing a correct version of the algritm then tried to make my own adjustments to it. If I did I would not have ran into a time issue when I realised that the code I wrote was note a true A * algoritm. If I were to do this project again I would plan better by giving myself some tolerance in terms of time near the end in case something unforseen happens like realising that the way I was implementing the node checking could not be considered using the A* algorithm.
 
 ## References
 https://thealgorithms.github.io/Python/autoapi/machine_learning/astar/index.html 20/03/2026
@@ -422,26 +420,6 @@ Grid::~Grid() {
 	std::cout << "Executing Grid destructor" << std::endl;
 #endif
 	grid.clear();
-}
-```
-
-main.cpp
-```C++
-#include <iostream> //cout, pair
-
-#include "NodeBase.h"
-#include "Grid.h"
-#include "Tests.h"
-
-int main() {
-	runTests();
-
-	Grid grid;
-	std::pair<int, int> start = {1,11};
-	std::pair<int, int> end = {16,18};
-
-	grid.aStarSearch(start, end);
-	return 0;
 }
 ```
 
