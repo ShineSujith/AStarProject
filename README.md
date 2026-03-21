@@ -1,13 +1,14 @@
 # A* Algorithm Project
+course: Bachelor of Engineering (Honours) in Software and Electronic Engineering
+module: C++ Programming
 by: Shine Sujith - G00414454
 
 ## Introduction
-This is a version of the A* algorithm a commonly used algorithm for pathfinding. It combines features of uniform-cost search and pure heuristic search to efficiently compute optimal paths. The A* algorithm is a best-first search algorithm in which the cost associated with a node is **f(n) = g(n) + h(n)**, where **g(n)** is the cost of the path from the initial state to **node n** and **h(n)** is the heuristic estimate or the cost or a path from node n to a goal []. It checks the surrounding nodes (neighbours) to the current node for the **g** and **h** values then computes **f** by adding them togther. Once it finds the lowest **f** value it will chose it as the shortest path. In the event of a tie where two neighbours have the same **f** value there is limited tie breaking logic to use the node with the lower **g** value. The algorithm will repeat this process until it has reached the destination node.
+This is a version of the A* algorithm a commonly used algorithm for pathfinding. It combines features of uniform-cost search and pure heuristic search to efficiently compute optimal paths. The A* algorithm is a best-first search algorithm in which the cost associated with a node is **f(n) = g(n) + h(n)**, where **g(n)** is the cost of the path from the initial state to **node n** and **h(n)** is the heuristic estimate or the cost or a path from node n to a goal [1]. It checks the surrounding nodes (neighbours) to the current node for the **g** and **h** values then computes **f** by adding them togther. Once it finds the lowest **f** value it will chose it as the shortest path. In the event of a tie where two neighbours have the same **f** value there is limited tie breaking logic to use the node with the lower **g** value. The algorithm will repeat this process until it has reached the destination node. My version of the A * algorithm only uses one list to track the path with back tracking logic. In a normal A * algorithm you would have two lists an open (nodes that have not been evaluated) and a closed (nodes that have been evaluated) list.
 
 ## Project Management
 ### Research
-I started the project off by doing research into what the A* algorithm is and how it works. My starting point was the resources linked in the course which helped me get an idea of the project structure I would use. The 
-version of the A* algorithm I ended up writing was heavily inspired by the Geeks for Geeks example we were given [].
+I started the project off by doing research into what the A* algorithm is and how it works. My starting point was the resources linked in the course which helped me get an idea of the project structure I would use. The version of the A* algorithm I ended up writing was heavily inspired by the Geeks for Geeks example we were given []. I also used sites like c++ reference and Stack Overflow to look a example code and figure out how to implement it into my own project [] [].
 
 ### Code Structure
 The code consists of the main.cpp file which is used to run the algorithm and the tests. It follows an **OO (Object Oriented)** style having two classes one for creating nodes that contains **f**, **g**, and **h** values used by the algorithm to determine the shortest path. The second class is called **grid** it contains methods to create and interact with the grid; it also has a method to run the algorithm called ```aStarSearch```.
@@ -64,17 +65,11 @@ public:
 ```
 
 ### Planning
-My plan was to split up this project into two-week sprints. In the first two weeks I planned to have a working version of the A* algorithm. I planned to spend the next two weeks polishing and improving the code.
-Then spend the last two weeks adding tests and writing my report.
+My plan was to split up this project into two-week sprints. In the first two weeks I planned to have a working version of the A* algorithm. I planned to spend the next two weeks polishing and improving the code. Then spend the last two weeks adding tests and writing my report.
 
-I kept to this plan and had a working version of the algorithm done by the middle of the second week. However I was unable to finish polishing and improving the code by the end of week four, this was because I realised
-the version of the algorithm I wrote could not be considered a true A* algorithm due to the fact I was creating one node that acted as a parent node shared between all surrounding nodes of the current node. This meant the
-algorithm heavily relied on the heuristic value (h) and g barely affected the output. At this point it was closer to a greedy best first/hill climber algorithm. Week four was spent updating my logic to create a node for
-each neighbour node rather than a parent node as well as trying to use the improved g value for tiebreaking (decide which path is shorter if the h values are the same by using the lower g value node).
+I kept to this plan and had a working version of the algorithm done by the middle of the second week. However I was unable to finish polishing and improving the code by the end of week four, this was because I realised the version of the algorithm I wrote could not be considered a true A* algorithm due to the fact I was creating one node that acted as a parent node shared between all surrounding nodes of the current node. This meant the algorithm heavily relied on the heuristic value (h) and g barely affected the output. At this point it was closer to a greedy best first/hill climber algorithm. Week four was spent updating my logic to create a node for each neighbour node rather than a parent node as well as trying to use the improved g value for tiebreaking (decide which path is shorter if the h values are the same by using the lower g value node).
 
-For the last two weeks of the project I continued to follow my plan to add tests and polish the code. I wrote tests to test potential senacios the code could run into like a success path, a failure path, if the start or end node is blocked
-or does not exist on the grid etc. During the last week I added some constructors, changed up my code to use pass by reference where possible and seeded the rand function I was using so the test would share the same grid layout allowing
-them to be more deterministic.
+For the last two weeks of the project I continued to follow my plan to add tests and polish the code. I wrote tests to test potential senacios the code could run into like a success path, a failure path, if the start or end node is blocked or does not exist on the grid etc. I also started to use GitHub copilot to review my code, it was through these reviews that I discovered I had not written a true A * algorithm. During the last week I added some constructors, changed up my code to use pass by reference where possible and seeded the rand function I was using so the test would share the same grid layout allowing them to be more deterministic.
 
 ## Output
 <img width="1105" height="418" alt="image" src="https://github.com/user-attachments/assets/a2c1bdb2-cfa6-4445-827f-20ec9cbc49b0" />
@@ -82,6 +77,27 @@ them to be more deterministic.
 
 ## Code/Core Content
 ### Grid.cpp
+NodeBase.cpp
+```C++
+#include <iostream>
+#include <cmath>
+#include "NodeBase.h"
+
+void NodeBase::setG(double newG) {
+	g = newG;
+};
+
+double NodeBase::getF() {
+	f = g + h;
+	return f;
+};
+
+//Calculates the Euclidean Distance
+void NodeBase::calculateH(std::pair<int, int> current, std::pair<int, int> dest) {
+	h = std::sqrt(std::pow(current.first - dest.first, 2) + std::pow(current.second - dest.second, 2));
+};
+```
+
 ```IsValid``` function is used to check if a node is valid i.e. within the confines of the 2D array. This fucntion is almost one for one what it was in the Geeks for Geeks example the main changes being it is now a member function of the Grid class and the node argument has been changed to use pass by reference instead of pass by copy to improve memory efficientcy and speed.
 ```C++
 bool Grid::isValid(const std::pair<int, int>& node) const {
@@ -138,8 +154,7 @@ void Grid::printGrid() const {
 };
 ```
 
-In the begining I had a method to resize the grid and populate it with unseeded random numbers between 0 and 1. This was done to make it easy to test and debug because since it was unseeded the grid would always be the same every time I ran
-the code.
+In the begining I had a method to resize the grid and populate it with unseeded random numbers between 0 and 1. This was done to make it easy to test and debug because since it was unseeded the grid would always be the same every time I ran the code.
 ```C++
 void Grid::setGrid() {
 	grid.resize(20, std::vector<int>(20, 0));
@@ -173,6 +188,36 @@ Grid::Grid(int row, int col) {
 	for (std::vector<int>& s : grid)
 		for (int& n : s)
 			n = rand() % 2;
+};
+```
+
+I added a destructor to clear the grid if it ever goes out of scope, this was more so just to follow good practice and allow possible expansion upon the current code.
+```C++
+Grid::~Grid() {
+#if VERBOSE
+	std::cout << "Executing Grid destructor" << std::endl;
+#endif
+	grid.clear();
+}
+```
+
+Since I added a destructor I had to follow the rule of three and add a copy constructor and a copy assignment constructor. Through a previous lab I learned that the vector library overload the assignment operator to make a deep copy of a vector when assigning them beacuse of this it made adding these constructors much more simple. I was running low on time when adding these constructors and this was a time that the inline AI suggestions came in handy.
+```C++
+Grid::Grid(const Grid& rhs) {
+#if VERBOSE
+	std::cout << "Executing Grid copy constructor" << std::endl;
+#endif
+	grid = rhs.grid;
+};
+
+Grid& Grid::operator=(const Grid& rhs) {
+#if VERBOSE
+	std::cout << "Executing Grid copy assignment constructor" << std::endl;
+#endif
+	if (this != &rhs) {
+		grid = rhs.grid;
+	}
+	return *this;
 };
 ```
 
@@ -376,73 +421,26 @@ void TestNodeEqualsDestination() {
 * Handle the empty path.back() crash by either not removing the element using erase if it is equal to the source node or handle it by throwing an exception.
 * Add additional logic to make the tie breaking logic more reliable.
 * Properly Implement random grid generation using something like default_random_engine instead of rand.
+* Make get f return g + h, that way I dont need a private f variable in my NodeBase class.
 
 ## Reflection
-During the course of this project I learned a lot about C++ in general, I learned how to create unit tests for C++ code, and gained valuable experince using many of the libraries C++ offers like the vectors and algorithm libraries. I think a big mistake I made while creating the code for the A * algoritm was that I tried to diviate from what the algorithm is too early. Instead I should  have tried writing a correct version of the algritm then tried to make my own adjustments to it. If I did I would not have ran into a time issue when I realised that the code I wrote was note a true A * algoritm. If I were to do this project again I would plan better by giving myself some tolerance in terms of time near the end in case something unforseen happens like realising that the way I was implementing the node checking could not be considered using the A* algorithm.
+During the course of this project I learned a lot about C++ in general, I learned how to create unit tests for C++ code, and gained valuable experince using many of the libraries C++ offers like the vectors and algorithm libraries [8] [9]. I think a big mistake I made while creating the code for the A * algoritm was that I tried to diviate from what the algorithm is too early. Instead I should  have tried writing a correct version of the algritm then tried to make my own adjustments to it. If I did I would not have ran into a time issue when I realised that the code I wrote was note a true A * algoritm. If I were to do this project again I would plan better by giving myself some tolerance in terms of time near the end in case something unforseen happens like realising that the way I was implementing the node checking could not be considered using the A* algorithm.
 
 ## References
-https://thealgorithms.github.io/Python/autoapi/machine_learning/astar/index.html 20/03/2026
+[1] "machine_learning.astar", thealgorithms. [Online]. <https://thealgorithms.github.io/Python/autoapi/machine_learning/astar/index.html> [Accessed: March, 20th, 2026]
 
-https://stackoverflow.com/questions/5768316/pop-a-specific-element-off-a-vector-in-c
+[2] Tarodev, "Pathfinding", youtube. [Online]. <https://www.youtube.com/watch?v=i0x5fj4PqP4> [Accessed: Febuary, 15th, 2026]
 
-https://www.geeksforgeeks.org/cpp/how-to-change-console-color-in-cpp/
+[3] Computerphile, "A* (A Star) Search Algorithm", youtube. [Online]. <https://www.youtube.com/watch?v=ySN5Wnu88nE> [Accessed: Febuary, 10th, 2026]
 
-https://en.cppreference.com/w/cpp/algorithm/find.html
+[4] "A* Search Algorithm", geeksforgeeks. [Online]. <https://www.geeksforgeeks.org/dsa/a-search-algorithm/> [Accessed: Febuary, 10th, 2026]
 
-Grid.cpp
+[5] "C++ reference", cppreference. [Online]. <https://en.cppreference.com/w/cpp.html> [Accessed: Febuary, 11th, 2026]
 
-```C++
-#include <iostream>	//cout, endl, pair, erase
-#include <vector>	//vector
-#include <stdlib.h>	//rand
-#include <cfloat>	//DBL_MAX
-#include <algorithm>//find
+[6] "stackoverflow", stackoverflow. [Online]. <https://stackoverflow.com/questions> [Accessed: Febuary, 11th, 2026]
 
-#include "Grid.h"
-#include "NodeBase.h"
+[7] "How to Change Console Color in C++?", geeksforgeeks. [Online]. <https://www.geeksforgeeks.org/cpp/how-to-change-console-color-in-cpp/> [Accessed: Febuary, 11th, 2026]
 
-Grid::Grid(const Grid& rhs) {
-#if VERBOSE
-	std::cout << "Executing Grid copy constructor" << std::endl;
-#endif
-	grid = rhs.grid;
-};
+[8] "pop a specific element off a vector in c++", stackoverflow. [Online]. <https://stackoverflow.com/questions/5768316/pop-a-specific-element-off-a-vector-in-c> [Accessed: Febuary, 11th, 2026]
 
-Grid& Grid::operator=(const Grid& rhs) {
-#if VERBOSE
-	std::cout << "Executing Grid copy assignment constructor" << std::endl;
-#endif
-	if (this != &rhs) {
-		grid = rhs.grid;
-	}
-	return *this;
-};
-
-Grid::~Grid() {
-#if VERBOSE
-	std::cout << "Executing Grid destructor" << std::endl;
-#endif
-	grid.clear();
-}
-```
-
-NodeBase.cpp
-```C++
-#include <iostream>
-#include <cmath>
-#include "NodeBase.h"
-
-void NodeBase::setG(double newG) {
-	g = newG;
-};
-
-double NodeBase::getF() {
-	f = g + h;
-	return f;
-};
-
-//Calculates the Euclidean Distance
-void NodeBase::calculateH(std::pair<int, int> current, std::pair<int, int> dest) {
-	h = std::sqrt(std::pow(current.first - dest.first, 2) + std::pow(current.second - dest.second, 2));
-};
-```
+[9] "std::find, std::find_if, std::find_if_not", cppreference. [Online]. <https://en.cppreference.com/w/cpp/algorithm/find.html> [Accessed: Febuary, 18th, 2026]
