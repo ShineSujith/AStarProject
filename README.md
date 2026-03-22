@@ -91,11 +91,11 @@ For the last two weeks of the project, I continued to follow my plan to add test
 
 Euclidean distance formula for two dimensions [7]:
 
-$d(p,q)=\sqrt {(p_1-q_1)^2+(p_2-q_2)^2}$
+<img width="315" height="48" alt="image" src="https://github.com/user-attachments/assets/a9a91af5-d687-413f-b25e-678f3963fc88" />
 
 Manhattan distance formula for two dimensions [8]:
 
-$d=|x_1−x_2|+|y_1−y_2|$
+<img width="197" height="32" alt="image" src="https://github.com/user-attachments/assets/4412e1db-39af-4eca-a886-57335483f12e" />
 
 ```C++
 #include <iostream>
